@@ -72,6 +72,7 @@ void redrawCurColor(int curColor) {
 
 void redrawCanvas(char* spriteData) {
 	int i = 0;
+	hidemouse();
 	for(i = 0; i < 256; i++) {
 		int x2 = i % 16; 
 		int y2 = i / 16;
@@ -123,6 +124,7 @@ int main(int argc, char** argv) {
 			spriteFile = fopen(argv[1], "w+");
 			if(spriteFile == NULL) {
 				perror("Mysterious file error detected!");
+				return 1;
 			}
 		}
 	} else {
@@ -254,6 +256,12 @@ int main(int argc, char** argv) {
 					);
 					showmouse();
 				}
+			} else if (mouseButtons == 4 && mouseButtonsOld != 4) {
+				int i = 0;
+				for(i; i < 256; i++) {
+					spriteData[i] = curColor;
+				}
+				redrawCanvas(spriteData);
 			}
 		
 		if(tick - lastTick >= 1) { 
