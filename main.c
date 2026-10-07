@@ -40,7 +40,7 @@ void hidemouse() {
     int86(0x33, &inregs, &outregs);    
 }
 
-void redrawScreen() {
+void drawHUD() {
 	int x = 0;
 	int y = 0;
 	int c = 0;
@@ -60,26 +60,27 @@ void redrawScreen() {
 	}
 	
 	for(x = 0; x < 16; x++) {
-		for(y = 0; y < 16; y++) {
-			//int x2 = i % 16; 
-			//int y2 = i / 16;
-			if(c > 14) { c = 0; }
-			
-			_setcolor(c);
-			_rectangle( _GFILLINTERIOR,
-				87 + x * 12,
-				3	 + y * 12,
-				87 + x * 12 + 12,
-				3 + y * 12 + 12
-			);
-			c++;
-		}
+		int x2 = i % 16; 
+		int y2 = i / 16;
+		
+		_setcolor(c);
+		_rectangle( _GFILLINTERIOR,
+			87 + x * 12,
+			3	 + y * 12,
+			87 + x * 12 + 12,
+			3 + y * 12 + 12
+		);
 	}
 	
 	_setcolor(15);
 	_rectangle(_GBORDER, 86, 2, 280, 196);
 	
 	showmouse();
+}
+
+void redrawCurColor(int curColor) {
+	_setcolor(curColor);
+	_rectangle(_GFILLINTERIOR, 73, 0, 83, 10);
 }
 
 int main() {
@@ -89,6 +90,10 @@ int main() {
     int mouseX = 0;
     int mouseY = 0;
     int mouseButtons = 0;
+	int mouseButtonsOld = 0;
+	
+	int curColor = 15;
+	int curColorOld = 15;
     
     if(_setvideomode(_MRES16COLOR) == 0) {
         printf("Sorry! No available screen modes were found!");
@@ -103,14 +108,58 @@ int main() {
 	setmousescreensize();
 	showmouse();
 	
-	redrawScreen();
+	drawHUD();
+	redrawCurColor(curColor);
 	
     while(1) {
+		char buff[24];
 		lastTick = tick;
 		tick = *(unsigned long far *)MK_FP(0x40,0x6c);
 		
 		if(tick - lastTick >= 1) { 
-
+			mouseButtonsOld = mouseButtons;
+			updatemouse(&mouseX, &mouseY, &mouseButtons);
+			
+			if(mouseButtons == 1 && mouseButtonsOld != 1) {
+				curColorOld = curColor;
+				if(	mouseX >= 0 && mouseX <= 25 && mouseY >= 0 && mouseY <= 25 ) {           // start of first row
+					curColor = 0;
+				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 25 && mouseY <= 50 ) {
+					curColor = 1;
+				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 50 && mouseY <= 75 ) {
+					curColor = 2;
+				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >=75 && mouseY <= 100 ) {
+					curColor = 3;
+				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 100 && mouseY <= 125 ) {
+					curColor = 4;
+				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 125 && mouseY <= 150 ) {
+					curColor = 5;
+				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 150 && mouseY <= 175 ) {
+					curColor = 6;
+				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 175 && mouseY <= 200 ) {
+					curColor = 7;
+				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 0 && mouseY <= 25 ) {    // start of second row
+					curColor = 8;
+				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 25 && mouseY <= 50 ) {
+					curColor = 9;
+				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 50 && mouseY <= 75 ) {
+					curColor = 10;
+				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >=75 && mouseY <= 100 ) {
+					curColor = 11;
+				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 100 && mouseY <= 125 ) {
+					curColor = 12;
+				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 125 && mouseY <= 150 ) {
+					curColor = 13;
+				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 150 && mouseY <= 175 ) {
+					curColor = 14;
+				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 175 && mouseY <= 200 ) {  // end of second row
+					curColor = 15;
+				}
+				
+				if(curColor != curColorOld) {
+					redrawCurColor(curColor);
+				}
+			}
 			
 			if(kbhit()) {
 				int key = getch();
