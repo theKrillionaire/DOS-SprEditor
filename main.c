@@ -80,10 +80,11 @@ void redrawCanvas(char* spriteData) {
 		_rectangle( _GFILLINTERIOR,
 			87 + x2 * 12,
 			3	 + y2 * 12,
-			87 + x2 * 12 + 12,
+			87 + x2 * 12 + 12	,
 			3 + y2 * 12 + 12
 		);
 	}
+	showmouse();
 }
 
 int main(int argc, char** argv) {
@@ -150,12 +151,10 @@ int main(int argc, char** argv) {
 		char buff[24];
 		lastTick = tick;
 		tick = *(unsigned long far *)MK_FP(0x40,0x6c);
+		mouseButtonsOld = mouseButtons;
+		updatemouse(&mouseX, &mouseY, &mouseButtons);
 		
-		if(tick - lastTick >= 1) { 
-			mouseButtonsOld = mouseButtons;
-			updatemouse(&mouseX, &mouseY, &mouseButtons);
-			
-			if(mouseButtons == 1 && mouseButtonsOld != 1) {
+		if(mouseButtons == 1 && mouseButtonsOld != 1) {
 				curColorOld = curColor;
 				if(	mouseX >= 0 && mouseX <= 25 && mouseY >= 0 && mouseY <= 25 ) {           // start of first row
 					curColor = 0;
@@ -194,7 +193,30 @@ int main(int argc, char** argv) {
 				if(curColor != curColorOld) {
 					redrawCurColor(curColor);
 				}
+				
+			} else if (mouseButtons == 1) {
+				if(mouseX > 87 && mouseX < 279 && mouseY > 3 && mouseY < 195) {
+					int x2 = (mouseX - 87) / 12;
+					int y2 = (mouseY - 3) / 12;
+					
+					int i2 = y2 * 16 + x2;
+					
+					spriteData[i2] = curColor;
+					
+					hidemouse();
+					_setcolor(curColor);
+					_rectangle( _GFILLINTERIOR,
+						87 + x2 * 12,
+						3 + y2 * 12,
+						87 + x2 * 12 + 11	,
+						3 + y2 * 12 + 11
+					);
+					showmouse();
+				}
 			}
+		
+		if(tick - lastTick >= 1) { 
+			
 			
 			if(kbhit()) {
 				int key = getch();
