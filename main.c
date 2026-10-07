@@ -88,11 +88,11 @@ void redrawCanvas(char* spriteData) {
 	showmouse();
 }
 
-void writeFile(FILE* spriteFile, char* spriteData) {
+void writeToFile(FILE* writeFile, char* spriteData) {
 	int i = 0;
-	rewind(spriteFile);
+	rewind(writeFile);
 	for(i; i < 256; i++) {
-		fputc(spriteData[i], spriteFile	);
+		fputc(spriteData[i], writeFile	);
 	}
 	_settextposition(25, 10);
 	_settextcolor(8);
@@ -104,6 +104,7 @@ int main(int argc, char** argv) {
     unsigned long lastTick = 0;
 	
 	FILE* spriteFile = NULL;
+	FILE* writeFile = NULL;
 	
     int mouseX = 0;
     int mouseY = 0;
@@ -119,19 +120,47 @@ int main(int argc, char** argv) {
 	
 	if(argc == 2) {
 		spriteFile = fopen(argv[1], "r+");
-		
-		if(spriteFile == NULL) {
-			spriteFile = fopen(argv[1], "w+");
-			if(spriteFile == NULL) {
-				perror("Mysterious file error detected!");
-				return 1;
-			}
-		}
+		writeFile = spriteFile;
+	} else if(argc == 3) {
+		spriteFile = fopen(argv[1], "r");
+		writeFile = fopen(argv[2], "r+");	
 	} else {
-		printf("Error! this program requires one(1) argument passed!!\n\nUsage: spredit file.spr\n");
+		printf("Error! this program requires one(1) or two(2) arguments passed!!\n\nUsage: \"SPREDIT FILE.SPR\" will open or create a file.\nUsage: \"SPREDIT OPEN.SPR SAVE.SPR\" will open from OPEN.SPR, and save into SAVE.SPR.\n");
 		return 1;
 	}
-	
+	if(spriteFile == NULL) {
+		if(argc == 2) {
+			spriteFile = fopen(argv[1], "w+");
+			writeFile = spriteFile;
+				if(spriteFile == NULL) {
+					perror("Mysterious file error detected!");
+					return 1;
+				}
+		} else if (argc == 3) {
+			spriteFile = fopen(argv[1], "w+");
+			writeFile = fopen(argv[2], "w+");
+				if(spriteFile == NULL) {
+					perror("Mysterious file error detected!");
+					return 1;
+				}
+		}
+	} else if(writeFile == NULL) {
+		if(argc == 2) {
+			spriteFile = fopen(argv[1], "w+");
+			writeFile = spriteFile;
+				if(spriteFile == NULL) {
+					perror("Mysterious file error detected!");
+					return 1;
+				}
+		} else if (argc == 3) {
+			spriteFile = fopen(argv[1], "w+");
+			writeFile = fopen(argv[2], "w+");
+				if(spriteFile == NULL) {
+					perror("Mysterious file error detected!");
+					return 1;
+				}
+		}
+	}
 	
     if(_setvideomode(_MRES16COLOR) == 0) {
         printf("Sorry! No available screen modes were found!");
@@ -150,6 +179,7 @@ int main(int argc, char** argv) {
 	if(spriteData == NULL) {
 		_setvideomode(_DEFAULTMODE);
 		fclose(spriteFile);
+		fclose(writeFile);
 		free(spriteData);	
 		printf("error! malloc refused!!");
 		return 1;	
@@ -276,6 +306,7 @@ int main(int argc, char** argv) {
 						hidemouse();
 						_setvideomode(_DEFAULTMODE);
 						fclose(spriteFile);
+						fclose(writeFile);
 						free(spriteData);
 						printf("balls");
 						return 0;
@@ -285,7 +316,7 @@ int main(int argc, char** argv) {
 						_outtext("testicle");
 					case 's':
 					case 'S':
-						writeFile(spriteFile, spriteData);
+						writeToFile(writeFile, spriteData);
 						break;
 				}
     		}
@@ -296,6 +327,7 @@ int main(int argc, char** argv) {
     _setvideomode(_DEFAULTMODE);
 	
 	fclose(spriteFile);
+	fclose(writeFile);
 	free(spriteData);	
 	
     return 0;
