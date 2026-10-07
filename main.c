@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <graph.h>
 #include <dos.h>
 #include <conio.h>
@@ -58,20 +59,6 @@ void drawHUD() {
 			c++;
 		}
 	}
-	
-	for(x = 0; x < 16; x++) {
-		int x2 = i % 16; 
-		int y2 = i / 16;
-		
-		_setcolor(c);
-		_rectangle( _GFILLINTERIOR,
-			87 + x * 12,
-			3	 + y * 12,
-			87 + x * 12 + 12,
-			3 + y * 12 + 12
-		);
-	}
-	
 	_setcolor(15);
 	_rectangle(_GBORDER, 86, 2, 280, 196);
 	
@@ -83,10 +70,28 @@ void redrawCurColor(int curColor) {
 	_rectangle(_GFILLINTERIOR, 73, 0, 83, 10);
 }
 
-int main() {
+void redrawCanvas(char* spriteData) {
+	int i = 0;
+	for(i = 0; i < 256; i++) {
+		int x2 = i % 16; 
+		int y2 = i / 16;
+		
+		_setcolor(spriteData[i]);
+		_rectangle( _GFILLINTERIOR,
+			87 + x2 * 12,
+			3	 + y2 * 12,
+			87 + x2 * 12 + 12,
+			3 + y2 * 12 + 12
+		);
+	}
+}
+
+int main(int argc, char** argv) {
 	unsigned long tick = 0;
     unsigned long lastTick = 0;
-
+	
+	FILE* spriteFile = NULL;
+	
     int mouseX = 0;
     int mouseY = 0;
     int mouseButtons = 0;
@@ -95,8 +100,26 @@ int main() {
 	int curColor = 15;
 	int curColorOld = 15;
     
+	char* spriteData;
+    
+	int fi = 0;
+	
+	if(argc == 2) {
+		spriteFile = fopen(argv[1], "r+");
+		
+		if(spriteFile == NULL) {
+			spriteFile = fopen(argv[1], "w+");
+		}
+	} else {
+		printf("Error! this program requires one(1) argument passed!!\n\nUsage: spredit file.spr\n");
+		return 1;
+	}
+	
+	
     if(_setvideomode(_MRES16COLOR) == 0) {
         printf("Sorry! No available screen modes were found!");
+		_setvideomode(_DEFAULTMODE);
+		return 1;
     }
 
     if(!initmouse()) {
@@ -105,11 +128,23 @@ int main() {
         return 1;
     }
 	
+	spriteData = malloc(sizeof(char) * 256);
+	
+	for(fi; fi < 256; fi++) {
+		int data = fgetc(spriteFile);
+		if(data != EOF) {
+			spriteData[fi] = data;
+		} else {
+			spriteData[fi] = 0;
+		}
+	}
+	
 	setmousescreensize();
 	showmouse();
 	
 	drawHUD();
 	redrawCurColor(curColor);
+	redrawCanvas(spriteData);
 	
     while(1) {
 		char buff[24];
@@ -179,6 +214,11 @@ int main() {
 		}
 	}
     _setvideomode(_DEFAULTMODE);
-
+	
+	fclose(spriteFile);
+	free(spriteData);
+	
+	printf("spriteData %s, spriteFile %i", spriteData, spriteFile); 
+	
     return 0;
 }
