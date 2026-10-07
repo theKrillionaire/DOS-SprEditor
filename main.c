@@ -210,38 +210,13 @@ int main(int argc, char** argv) {
 		
 		if(mouseButtons == 1 && mouseButtonsOld != 1) {
 				curColorOld = curColor;
-				if(	mouseX >= 0 && mouseX <= 25 && mouseY >= 0 && mouseY <= 25 ) {           // start of first row
-					curColor = 0;
-				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 25 && mouseY <= 50 ) {
-					curColor = 1;
-				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 50 && mouseY <= 75 ) {
-					curColor = 2;
-				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >=75 && mouseY <= 100 ) {
-					curColor = 3;
-				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 100 && mouseY <= 125 ) {
-					curColor = 4;
-				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 125 && mouseY <= 150 ) {
-					curColor = 5;
-				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 150 && mouseY <= 175 ) {
-					curColor = 6;
-				} else if( mouseX >= 0 && mouseX <= 25 && mouseY >= 175 && mouseY <= 200 ) {
-					curColor = 7;
-				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 0 && mouseY <= 25 ) {    // start of second row
-					curColor = 8;
-				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 25 && mouseY <= 50 ) {
-					curColor = 9;
-				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 50 && mouseY <= 75 ) {
-					curColor = 10;
-				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >=75 && mouseY <= 100 ) {
-					curColor = 11;
-				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 100 && mouseY <= 125 ) {
-					curColor = 12;
-				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 125 && mouseY <= 150 ) {
-					curColor = 13;
-				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 150 && mouseY <= 175 ) {
-					curColor = 14;
-				} else if( mouseX >= 25 && mouseX <= 50 && mouseY >= 175 && mouseY <= 200 ) {  // end of second row
-					curColor = 15;
+				int mouseFirstColumn = mouseX >= 0 && mouseX <= 25;
+				int mouseSecondColumn = mouseX >= 25 && mouseX <= 50;
+				int y3 = mouseY / 25;
+				if(mouseFirstColumn) {
+					curColor = y3;
+				} else if (mouseSecondColumn) {
+					curColor = y3 + 8;
 				}
 				
 				if(curColor != curColorOld) {
