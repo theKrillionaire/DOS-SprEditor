@@ -87,6 +87,17 @@ void redrawCanvas(char* spriteData) {
 	showmouse();
 }
 
+void writeFile(FILE* spriteFile, char* spriteData) {
+	int i = 0;
+	rewind(spriteFile);
+	for(i; i < 256; i++) {
+		fputc(spriteData[i], spriteFile	);
+	}
+	_settextposition(25, 10);
+	_settextcolor(8);
+	_outtext("Saved sprite!");
+}
+
 int main(int argc, char** argv) {
 	unsigned long tick = 0;
     unsigned long lastTick = 0;
@@ -110,6 +121,9 @@ int main(int argc, char** argv) {
 		
 		if(spriteFile == NULL) {
 			spriteFile = fopen(argv[1], "w+");
+			if(spriteFile == NULL) {
+				perror("Mysterious file error detected!");
+			}
 		}
 	} else {
 		printf("Error! this program requires one(1) argument passed!!\n\nUsage: spredit file.spr\n");
@@ -130,6 +144,14 @@ int main(int argc, char** argv) {
     }
 	
 	spriteData = malloc(sizeof(char) * 256);
+	
+	if(spriteData == NULL) {
+		_setvideomode(_DEFAULTMODE);
+		fclose(spriteFile);
+		free(spriteData);	
+		printf("error! malloc refused!!");
+		return 1;	
+	}
 	
 	for(fi; fi < 256; fi++) {
 		int data = fgetc(spriteFile);
@@ -213,6 +235,25 @@ int main(int argc, char** argv) {
 					);
 					showmouse();
 				}
+			} else if (mouseButtons == 2) {
+				if(mouseX > 87 && mouseX < 279 && mouseY > 3 && mouseY < 195) {
+					int x2 = (mouseX - 87) / 12;
+					int y2 = (mouseY - 3) / 12;
+					
+					int i2 = y2 * 16 + x2;
+					
+					spriteData[i2] = 0;
+					
+					hidemouse();
+					_setcolor(0);
+					_rectangle( _GFILLINTERIOR,
+						87 + x2 * 12,
+						3 + y2 * 12,
+						87 + x2 * 12 + 11	,
+						3 + y2 * 12 + 11
+					);
+					showmouse();
+				}
 			}
 		
 		if(tick - lastTick >= 1) { 
@@ -224,23 +265,30 @@ int main(int argc, char** argv) {
 				switch (key) {
 					case 'e':
 					case 'E':
+						hidemouse();
 						_setvideomode(_DEFAULTMODE);
+						fclose(spriteFile);
+						free(spriteData);
 						printf("balls");
 						return 0;
 						break;
 					case 'a':
 					case 'A':
 						_outtext("testicle");
+					case 's':
+					case 'S':
+						writeFile(spriteFile, spriteData);
+						break;
 				}
     		}
 		}
 	}
+	
+	hidemouse();
     _setvideomode(_DEFAULTMODE);
 	
 	fclose(spriteFile);
-	free(spriteData);
-	
-	printf("spriteData %s, spriteFile %i", spriteData, spriteFile); 
+	free(spriteData);	
 	
     return 0;
 }
